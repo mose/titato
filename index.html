@@ -1,0 +1,160 @@
+<html>
+  <head>
+    <title>TiTaTo: hotseat game</title>
+    <meta charset="utf-8">
+    <style>
+      body { background-color: #000; color: #fff; font-family: monospace;}
+      h1 { text-align: center; font-size: 54px; font-family: monospace;}
+      h1 span { font-size: 30px; color: #999;}
+      #result { display: none; }
+      #init { width: 320px; margin: 50px auto; text-align: center; }
+      #init .title { font-size: 24px; margin-bottom: 20px;}
+      #init .bl { width: 150px; display: inline-block; text-align: center; padding: 20px 0; border: 2px solid #000; border-radius: 5px; }
+      #init .bl:hover { cursor: pointer; background-color: #444; border: 2px solid #fff;  }
+      #init .bl .startcell { margin-bottom: 20px; }
+      #init .result { width: 70px; display: inline-block; text-align: center; font-size: 24px; }
+      #grid { margin: 20px auto; display: none; text-align: center; }
+      .cell, .startcell { width: 100px; height: 100px; display: inline-block; border: 1px solid #333; margin: 2px;border-radius: 5px; }
+      .won .cell { border: 1px solid #fff;}
+      .active { cursor: pointer; }
+      .active:hover { border: 1px solid #ccc; }
+      .x { background-color: #369; border: 1px solid #ccc; }
+      .o { background-color: #c33; border: 1px solid #ccc; }
+      .done { border: 1px solid #fff; cursor: auto;  }
+      #again { display: none; width: 320px; margin: 10px auto; text-align: center;
+        background-color: #ccc; padding: 10px 0; color: #000; font-size: 32px;
+        border-radius: 10px; }
+      #again:hover { cursor: pointer; background-color: #fff; }
+      #message { display: none; width: 320px; margin: 10px auto; text-align: center; font-size: 40px; }
+    </style>
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded',function() {
+        var getByClass = function(className, parent) {
+          parent || (parent = document);
+          var descendants = parent.getElementsByTagName("*"), i=-1, e, result=[];
+          while (e = descendants[++i]) {
+            ((' '+(e['class'] || e.className)+' ').indexOf(' '+className+' ') > -1) && result.push(e);
+          }
+          return result;
+        }
+        var transpose = function(a) {
+          return Object.keys(a[0]).map(function (c) { return a.map(function (r) { return r[c]; }); });
+        }
+        var diagonalize = function(a) {
+          return [ [ grid3[0][0], grid3[1][1], grid3[2][2] ], [ grid3[0][2], grid3[1][1], grid3[2][0] ] ];
+        }
+        var fullgrid = function() {
+          return grid3.concat(transpose(grid3)).concat(diagonalize(grid3));
+        }
+        var playedslots = function() {
+          return fullgrid().map(function(x){ return x.map(function(y){if(y!==false) return y; }).join("") });
+        }
+        var showmessage = function(text) {
+          document.getElementById("message").innerHTML = text;
+          document.getElementById("message").style.display = "block";
+        }
+        var play = function(el) {
+          id = el.id.split("");
+          if (grid3[id[0]][id[1]] === false) {
+            el.className = "cell " + player;
+            grid3[id[0]][id[1]] = player;
+            if (playedslots().indexOf("xxx") !== -1) {
+              endgame();
+              wins.p1++;
+              showmessage("Player 1 wins");
+              return;
+            } else if (playedslots().indexOf("ooo") !== -1) {
+              endgame();
+              wins.p2++;
+              showmessage("Player 2 wins");
+              return;
+            } else if (playedslots().join("").length === 24) {
+              endgame();
+              wins.draw++;
+              showmessage("Draw ...");
+            } else {
+              player = (player === "x") ? "o" : "x";
+            }
+          }
+        }
+        var clicklistener = function(e) {
+          play(e.target);
+        }
+        var endgame = function() {
+          for (i=0;i<cells.length;i++) {
+            cells[i].className += " done";
+            cells[i].removeEventListener("click",clicklistener);
+          }
+          document.getElementById("again").style.display = "block";
+        }
+        var reset = function() {
+          grid3 = [[false,false,false],[false,false,false],[false,false,false]];
+          for (i=0;i<cells.length;i++) {
+            cells[i].className = "cell active";
+            cells[i].removeEventListener("click",clicklistener);
+          }
+          document.getElementById("init").style.display = "block";
+          document.getElementById("grid").style.display = "none";
+          document.getElementById("again").style.display = "none";
+          document.getElementById("message").style.display = "none";
+          document.getElementById("p1").innerHTML = wins.p1;
+          document.getElementById("p2").innerHTML = wins.p2;
+          document.getElementById("draw").innerHTML = wins.draw;
+        }
+        var init = function() {
+          for (i=0;i<cells.length;i++) {
+            cells[i].addEventListener("click",clicklistener);
+          }
+          document.getElementById("init").style.display = "none";
+          document.getElementById("grid").style.display = "block";
+        }
+
+        var player;
+        var grid3 = [[false,false,false],[false,false,false],[false,false,false]];
+        var cells = getByClass("cell");
+        var start = getByClass("bl");
+        var wins = { p1: 0, p2: 0, draw: 0 };
+
+        for (i=0;i<start.length;i++) {
+          start[i].addEventListener("click",function(e) {
+            e.stopPropagation();
+            player = e.target.getAttribute("data-player");
+            init();
+          });
+        }
+        document.getElementById("again").addEventListener("click", function(e) {
+          reset();
+        });
+
+      });
+    </script>
+  </head>
+  <body>
+    <h1>tictactoe<br /><span>Hotseat Game</span></h1>
+    <div id="init">
+      <div class="title">
+        Who will play first ?
+      </div>
+      <div class="bl" data-player="x">
+        <div class="startcell x" data-player="x"></div><br />
+        Blue is player 1
+      </div>
+      <div class="bl" data-player="o">
+        <div class="startcell o" data-player="o"></div><br />
+        Red is player 2
+      </div>
+      <div>
+        <div class="result" id="p1">0</div>
+        <div class="result" id="draw">0</div>
+        <div class="result" id="p2">0</div>
+      </div>
+    </div>
+    <div id="grid">
+      <div class="cell active" id="00"></div><div class="cell active" id="01"></div><div class="cell active" id="02"></div><br />
+      <div class="cell active" id="10"></div><div class="cell active" id="11"></div><div class="cell active" id="12"></div><br />
+      <div class="cell active" id="20"></div><div class="cell active" id="21"></div><div class="cell active" id="22"></div><br />
+    </div>
+    <div id="message"></div>
+    <div id="again">Play Again</div>
+  </body>
+</html>
