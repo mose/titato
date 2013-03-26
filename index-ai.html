@@ -103,7 +103,8 @@
             playmove(nextrow,nextcell);
             return;
           }
-          id = ["00","02","11","20","22"].randomElement();
+          diags = ["00","02","11","20","22"];
+          id = diags.randomElement();
           i = id.split("");
           if (grid[id[0]][id[1]] !== false) {
             diags.splice(diags.indexOf(id),1);
