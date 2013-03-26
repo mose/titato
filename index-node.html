@@ -7,7 +7,9 @@
       h1 { text-align: center; font-size: 54px; font-family: monospace;}
       h1 span { font-size: 30px; color: #999;}
       #result { display: none; }
-      #init { width: 320px; margin: 50px auto; text-align: center; }
+      #login { width: 320px; margin: 50px auto; text-align: center; }\
+      #login input { width: 50%; }
+      #init { width: 320px; margin: 50px auto; text-align: center; display: none; }
       #init .title { font-size: 24px; margin-bottom: 20px;}
       #init .bl { width: 150px; display: inline-block; text-align: center; padding: 20px 0; border: 2px solid #000; border-radius: 5px; }
       #init .bl:hover { cursor: pointer; background-color: #444; border: 2px solid #fff;  }
@@ -27,13 +29,17 @@
       #again:hover { cursor: pointer; background-color: #fff; }
       #message { display: none; width: 320px; margin: 10px auto; text-align: center; font-size: 40px; }
     </style>
+    <script src="/config.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
       document.addEventListener('DOMContentLoaded',function() {
-        var socket = io.connect('http://localhost');
-        socket.on('news', function (data) {
+        var username;
+        var socket = io.connect(url);
+        socket.on('list', function (data) {
           console.log(data);
-          socket.emit('my other event', { my: 'data' });
+        });
+        socket.on("connected", function (data) {
+          alert(data.name + " connected.");
         });
 
         Array.prototype.randomElement = function () {
@@ -186,12 +192,28 @@
         document.getElementById("again").addEventListener("click", function(e) {
           reset();
         });
+        document.getElementById("loginsubmit").addEventListener("click", function(e) {
+          e.preventDefault();
+          username = document.getElementById("username").value;
+          alert(username);
+          socket.emit("identify", username, function(result) {
+            console.log(result);
+            document.getElementById("login").style.display = "none";
+            document.getElementById("init").style.display = "block";
+          });
+        });
 
       });
     </script>
   </head>
   <body>
     <h1>tictactoe<br /><span>Defeat the Robot</span></h1>
+    <div id="login">
+      <form id="loginform">
+        <input type="text" name="login" id="username" placeholder="Enter your name" value="" />
+        <input type="submit" value="login" id="loginsubmit" />
+      </form>
+    </div>
     <div id="init">
       <div class="title">
         Who will play first ?

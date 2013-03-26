@@ -11,23 +11,41 @@ var app = require('http').createServer(handler)
 
 
 function handler (req, res) {
-  fs.readFile(__dirname + '/index-node.html',
-  function (err, data) {
-    if (err) {
-      res.writeHead(500);
-      return res.end('Error loading index-node.html');
-    }
-    res.writeHead(200, {
-      'Content-Length': data.length,
-      'Content-Type': 'text/html'
-    });
+  if (req.url === '/config.js') {
+    data = 'var url = "'+config.server+":"+config.port+'"';
+      res.writeHead(200, {
+        'Content-Length': data.length,
+        'Content-Type': 'text/html'
+      });    
     res.end(data);
-  });
+  } else {
+    fs.readFile(__dirname + '/index-node.html',
+    function (err, data) {
+      if (err) {
+        res.writeHead(500);
+        return res.end('Error loading index-node.html');
+      }
+      res.writeHead(200, {
+        'Content-Length': data.length,
+        'Content-Type': 'text/html'
+      });
+      res.end(data);
+    });
+  }
 }
+
+var connected_users = {};
+
 io.sockets.on('connection', function (socket) {
-  socket.emit('news', { hello: 'world' });
-  socket.on('my other event', function (data) {
-    console.log(data);
+  socket.on('identify', function (name) {
+    console.log(name);
+    socket.set('nickname', name, function () {
+      socket.broadcast.emit('connected', { name: name });
+      socket.emit('ready');
+    });
+  });
+  socket.on("list", function(socket) {
+    socket.emit("list", connected_users);
   });
 });
 
