@@ -1,0 +1,25 @@
+{
+  "name": "titato-server",
+  "version": "0.0.1",
+  "author": "mose <mose@mose.com>",
+  "description": "A multiplayer tic-tac-toe server with optional AI competition.",
+  "scripts": {
+    "start": "node titato.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mose/titato.git"
+  },
+  "keywords": [
+    "server",
+    "game",
+    "multiplayer"
+  ],
+  "dependencies": {
+    "socket.io": "0.9.13"
+  },
+  "license": "MIT",
+  "engine": {
+    "node": ">=0.6"
+  }
+}
