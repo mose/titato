@@ -7,6 +7,7 @@ if (!fs.existsSync("./config.json")) {
 
 var app = require('http').createServer(handler)
 , config = require("./config")
+, md5 = require('MD5')
 , io = require('socket.io').listen(app);
 
 // io.enable('browser client minification');
@@ -37,36 +38,49 @@ function handler (req, res) {
   }
 }
 
-var connected_users = [];
+var connected_users = {};
+
+io.configure(function (){
+  io.set("authorization", function (data, accept) {
+    data.sid = md5(data.address.address + data.headers['user-agent'])
+    accept(null, true);
+  });
+});
 
 io.sockets.on('connection', function (socket) {
+  socket.set("sid",socket.handshake.sid);
+  socket.emit('users list', Object.keys(connected_users) );
   socket.on('hello', function () {
     if (socket.get('nickname')) {
       socket.emit('identified', socket.get('nickname'));
     }
   });
   socket.on('identify', function (data) {
-    if (connected_users.indexOf(data.name) !== -1) {
+    if (connected_users[data]) {
       socket.emit('identified', { message: "This username is already taken, please chose another." });
+    } else if (data.length > 32) {
+      socket.emit('identified', { message: "This username too long (&gt;32)." });
     } else {
-      socket.set('nickname', data.name);
-      connected_users.push(data.name);
-      socket.broadcast.emit("new player", { name: data.name });
-      socket.broadcast.emit('users list', { users: connected_users });
-      socket.emit('identified', data.name);
-      socket.emit('users list', { users: connected_users });
+      socket.me = data;
+      connected_users[data] = socket.handshake.sid;
+      socket.broadcast.emit("new player", { name: data });
+      socket.broadcast.emit('users list', Object.keys(connected_users) );
+      socket.emit('identified', data);
+      socket.emit('users list', Object.keys(connected_users) );
     }
   });
-  socket.on("list", function(socket) {
-    socket.emit("list", connected_users);
+  socket.on('disconnect', function() {
+    name = socket.me;
+    console.log(name);
+    delete connected_users[name];
+    socket.broadcast.emit('users list', Object.keys(connected_users) );
+  });
+  socket.on('message', function(data) {
+    console.log(connected_users);
   });
 });
 
-io.sockets.on('disconnect', function() {
-  name = socket.get('nickname');
-  connected_users.splice(connected_users.indexOf(name),1);
-  socket.broadcast.emit('users list', { users: connected_users });
-});
+
 
 app.listen(config.port,config.server);
 console.log('Server running at '+config.server+":"+config.port);

@@ -3,15 +3,19 @@
     <title>TiTaTo: fight robot</title>
     <meta charset="utf-8">
     <style>
-      body { background-color: #000; color: #fff; font-family: monospace; }
+      body { background-color: #000; color: #fff; font-family: monospace; margin: 0; padding: 0; }
       h1 { text-align: center; font-size: 54px; font-family: monospace; }
       h1 span { font-size: 30px; color: #999;}
       #result { display: none; }
       #login { width: 320px; margin: 50px auto; text-align: center; }
       #login input { width: 40%; }
       #flash { color: #f90; }
-      #userslist { width: 320px; margin: 50px auto; text-align: left; display: none; }
-      #userslist li.me { background-color: #444; color: #d98;}
+      #userslist { width: 220px; height: 100%; margin-right: 20px; text-align: left; position: fixed; top: 0; left: 0; background-color: #444; overflow-y: scroll; overflow-x: hidden; }
+      #userslist h3 { padding: 0 20px; color}
+      #userslist ul { list-style: none; padding: 0; }
+      #userslist ul li { padding: 5px 20px; border-top: 1px solid #444; border-bottom: 1px solid #444; cursor: pointer; }
+      #userslist ul li:hover { border-top: 1px solid #000; border-bottom: 1px solid #000; }
+      #userslist ul li.me { background-color: #444; color: #d98; }
       #init { width: 320px; margin: 50px auto; text-align: center; display: none; }
       #init .title { font-size: 24px; margin-bottom: 20px;}
       #init .bl { width: 150px; display: inline-block; text-align: center; padding: 20px 0; border: 2px solid #000; border-radius: 5px; }
@@ -41,10 +45,10 @@
         var message_div = document.getElementById("message");
         var login_div = document.getElementById("login");
         var flash_div = document.getElementById("flash");
-        var userslist_ul = document.getElementById("userslist");
+        var userslist_div = document.getElementById("userslist");
         var init_div = document.getElementById("init");
         var socket = io.connect(url);
-        console.log(socket);
+
         socket.on('connect', function () {
           socket.send("hello");
         });
@@ -54,24 +58,21 @@
         socket.on("identified", function(result) {
           if (result === username) {
             login_div.style.display = "none";
-            userslist_ul.style.display = "block";
           } else {
             username = "";
             flash_div.innerHTML = result.message;
           }
         });
         socket.on("users list", function (data) {
-          if (stage > 0) {
-            userslist_ul.innerHTML = "";
-            for (i=0;i<data.users.length;i++) {
-              li = document.createElement("li");
-              li.id = data.users[i];
-              if (data.users[i] === username) {
-                li.className = "me";
-              }
-              li.appendChild(document.createTextNode(data.users[i]));
-              userslist_ul.appendChild(li);
+          userslist_div.children[1].innerHTML = "";
+          for (i=0;i<data.length;i++) {
+            li = document.createElement("li");
+            li.id = data[i];
+            if (data[i] === username) {
+              li.className = "me";
             }
+            li.appendChild(document.createTextNode(data[i]));
+            userslist_div.children[1].appendChild(li);
           }
         });
 
@@ -229,7 +230,7 @@
           e.preventDefault();
           stage++;
           username = document.getElementById("username").value;
-          socket.emit("identify", { name: username });
+          socket.emit("identify", username);
         });
 
       });
@@ -237,6 +238,10 @@
   </head>
   <body>
     <h1>tictactoe<br /><span>Fight!</span></h1>
+    <div id="userslist">
+      <h3>/who</h3>
+      <ul></ul>
+    </div>
     <div id="login">
       <div id="flash"></div>
       <form id="loginform">
@@ -244,8 +249,6 @@
         <input type="submit" value="login" id="loginsubmit" />
       </form>
     </div>
-    <ul id="userslist">
-    </ul>
 
     <div id="init">
       <div class="title">
