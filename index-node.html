@@ -3,12 +3,15 @@
     <title>TiTaTo: fight robot</title>
     <meta charset="utf-8">
     <style>
-      body { background-color: #000; color: #fff; font-family: monospace;}
-      h1 { text-align: center; font-size: 54px; font-family: monospace;}
+      body { background-color: #000; color: #fff; font-family: monospace; }
+      h1 { text-align: center; font-size: 54px; font-family: monospace; }
       h1 span { font-size: 30px; color: #999;}
       #result { display: none; }
-      #login { width: 320px; margin: 50px auto; text-align: center; }\
-      #login input { width: 50%; }
+      #login { width: 320px; margin: 50px auto; text-align: center; }
+      #login input { width: 40%; }
+      #flash { color: #f90; }
+      #userslist { width: 320px; margin: 50px auto; text-align: left; display: none; }
+      #userslist li.me { background-color: #444; color: #d98;}
       #init { width: 320px; margin: 50px auto; text-align: center; display: none; }
       #init .title { font-size: 24px; margin-bottom: 20px;}
       #init .bl { width: 150px; display: inline-block; text-align: center; padding: 20px 0; border: 2px solid #000; border-radius: 5px; }
@@ -34,12 +37,42 @@
     <script type="text/javascript">
       document.addEventListener('DOMContentLoaded',function() {
         var username;
+        var stage = 0;
+        var message_div = document.getElementById("message");
+        var login_div = document.getElementById("login");
+        var flash_div = document.getElementById("flash");
+        var userslist_ul = document.getElementById("userslist");
+        var init_div = document.getElementById("init");
         var socket = io.connect(url);
-        socket.on('list', function (data) {
-          console.log(data);
+        console.log(socket);
+        socket.on('connect', function () {
+          socket.send("hello");
         });
-        socket.on("connected", function (data) {
+        socket.on("new player", function (data) {
           alert(data.name + " connected.");
+        });
+        socket.on("identified", function(result) {
+          if (result === username) {
+            login_div.style.display = "none";
+            userslist_ul.style.display = "block";
+          } else {
+            username = "";
+            flash_div.innerHTML = result.message;
+          }
+        });
+        socket.on("users list", function (data) {
+          if (stage > 0) {
+            userslist_ul.innerHTML = "";
+            for (i=0;i<data.users.length;i++) {
+              li = document.createElement("li");
+              li.id = data.users[i];
+              if (data.users[i] === username) {
+                li.className = "me";
+              }
+              li.appendChild(document.createTextNode(data.users[i]));
+              userslist_ul.appendChild(li);
+            }
+          }
         });
 
         Array.prototype.randomElement = function () {
@@ -84,8 +117,8 @@
           play(document.getElementById(c));
         }
         var showmessage = function(text) {
-          document.getElementById("message").innerHTML = text;
-          document.getElementById("message").style.display = "block";
+          message_div.innerHTML = text;
+          message_div.style.display = "block";
         }
         var aiplay = function() {
           grid = fullgrid();
@@ -158,10 +191,10 @@
             cells[i].className = "cell active";
             cells[i].removeEventListener("click",clicklistener);
           }
-          document.getElementById("init").style.display = "block";
+          init_div.style.display = "block";
           document.getElementById("grid").style.display = "none";
           document.getElementById("again").style.display = "none";
-          document.getElementById("message").style.display = "none";
+          message_div.style.display = "none";
           document.getElementById("human").innerHTML = wins.human;
           document.getElementById("robot").innerHTML = wins.robot;
           document.getElementById("draw").innerHTML = wins.draw;
@@ -170,7 +203,7 @@
           for (i=0;i<cells.length;i++) {
             cells[i].addEventListener("click",clicklistener);
           }
-          document.getElementById("init").style.display = "none";
+          init_div.style.display = "none";
           document.getElementById("grid").style.display = "block";
           if (player === "o") {
             aiplay();
@@ -194,33 +227,33 @@
         });
         document.getElementById("loginsubmit").addEventListener("click", function(e) {
           e.preventDefault();
+          stage++;
           username = document.getElementById("username").value;
-          alert(username);
-          socket.emit("identify", username, function(result) {
-            console.log(result);
-            document.getElementById("login").style.display = "none";
-            document.getElementById("init").style.display = "block";
-          });
+          socket.emit("identify", { name: username });
         });
 
       });
     </script>
   </head>
   <body>
-    <h1>tictactoe<br /><span>Defeat the Robot</span></h1>
+    <h1>tictactoe<br /><span>Fight!</span></h1>
     <div id="login">
+      <div id="flash"></div>
       <form id="loginform">
         <input type="text" name="login" id="username" placeholder="Enter your name" value="" />
         <input type="submit" value="login" id="loginsubmit" />
       </form>
     </div>
+    <ul id="userslist">
+    </ul>
+
     <div id="init">
       <div class="title">
         Who will play first ?
       </div>
       <div class="bl" data-player="x">
         <div class="startcell x" data-player="x"></div><br />
-        Blue is human
+        Blue is you
       </div>
       <div class="bl" data-player="o">
         <div class="startcell o" data-player="o"></div><br />
