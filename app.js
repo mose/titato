@@ -21,35 +21,33 @@ var files = new (statics.Server)(path.join(__dirname, config.public_dir), {
 // io.enable('browser client gzip');
 
 function handler (req, res) {
-  req.addListener('end', function () {
-    if (req.url === '/config.js') {
-      data = 'var url = "http://'+config.server+":"+config.port+'";';
-        res.writeHead(200, {
-          'Content-Length': data.length,
-          'Content-Type': 'text/html'
-        });
+  if (req.url === '/config.js') {
+    data = 'var url = "http://'+config.server+":"+config.port+'";';
+      res.writeHead(200, {
+        'Content-Length': data.length,
+        'Content-Type': 'text/html'
+      });
+    res.end(data);
+  } else if (req.url === '/') {
+    fs.readFile(__dirname + '/index-node.html',
+    function (err, data) {
+      if (err) {
+        res.writeHead(500);
+        return res.end('Error loading index-node.html');
+      }
+      res.writeHead(200, {
+        'Content-Length': data.length,
+        'Content-Type': 'text/html'
+      });
       res.end(data);
-    } else if (req.url === '/') {
-      fs.readFile(__dirname + '/index-node.html',
-      function (err, data) {
-        if (err) {
-          res.writeHead(500);
-          return res.end('Error loading index-node.html');
-        }
-        res.writeHead(200, {
-          'Content-Length': data.length,
-          'Content-Type': 'text/html'
-        });
-        res.end(data);
-      });
-    } else {
-      files.serve(req, res, function(e, r) {
-        if (e && (e.status === 404)) {
-          files.serveFile('404.html', 404, {}, req, res);
-        }
-      });
-    }
-  });
+    });
+  } else {
+    files.serve(req, res, function(e, r) {
+      if (e && (e.status === 404)) {
+        files.serveFile('/404.html', 404, {}, req, res);
+      }
+    });
+  }
 }
 
 var connected_users = {};
@@ -79,8 +77,8 @@ io.sockets.on('connection', function (socket) {
       connected_users[data] = socket.handshake.sid;
       socket.broadcast.emit("new player", { name: data });
       socket.broadcast.emit('users list', Object.keys(connected_users) );
-      socket.emit('identified', data);
       socket.emit('users list', Object.keys(connected_users) );
+      socket.emit('identified', data);
     }
   });
   socket.on('disconnect', function() {

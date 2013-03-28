@@ -1,5 +1,5 @@
 {
   "server": "localhost",
   "port": "4001",
-  "public_dir": "./public"
+  "public_dir": "public"
 }
