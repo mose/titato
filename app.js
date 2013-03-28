@@ -8,6 +8,7 @@ if (!fs.existsSync("./config.json")) {
 var app = require('http').createServer(handler)
 , statics = require('node-static')
 , config = require("./config")
+, game = require("./lib/game")
 , md5 = require('MD5')
 , path = require('path')
 , io = require('socket.io').listen(app);
@@ -29,8 +30,7 @@ function handler (req, res) {
       });
     res.end(data);
   } else if (req.url === '/') {
-    fs.readFile(__dirname + '/index-node.html',
-    function (err, data) {
+    fs.readFile(__dirname + '/index-node.html', function (err, data) {
       if (err) {
         res.writeHead(500);
         return res.end('Error loading index-node.html');
@@ -51,36 +51,40 @@ function handler (req, res) {
 }
 
 var connected_users = {};
+var users = {};
 
 io.configure(function (){
   io.set("authorization", function (data, accept) {
-    data.sid = md5(data.address.address + data.headers['user-agent'])
+    data.sid = md5(data.address.address + data.headers['user-agent']);
     accept(null, true);
   });
 });
 
 io.sockets.on('connection', function (socket) {
-  socket.set("sid",socket.handshake.sid);
   socket.emit('users list', Object.keys(connected_users) );
-  socket.on('hello', function () {
-    if (socket.get('nickname')) {
-      socket.emit('identified', socket.get('nickname'));
-    }
-  });
+
   socket.on('identify', function (data) {
     if (connected_users[data]) {
       socket.emit('identified', { message: "This username is already taken, please chose another." });
     } else if (data.length > 32) {
       socket.emit('identified', { message: "This username too long (&gt;32)." });
     } else {
-      socket.me = data;
-      connected_users[data] = socket.handshake.sid;
-      socket.broadcast.emit("new player", { name: data });
+      socket.me = encodeURI(data);
+      connected_users[data] = socket;
+      users[data] = socket.handshake.sid;
       socket.broadcast.emit('users list', Object.keys(connected_users) );
       socket.emit('users list', Object.keys(connected_users) );
       socket.emit('identified', data);
     }
   });
+
+  socket.on("fight", function(data) {
+    console.log(data);
+    connected_users[data].emit("fight", socket.me);
+    socket.emit("fight", data);
+  });
+  socket.on("play", function(data) {
+  });  
   socket.on('disconnect', function() {
     name = socket.me;
     delete connected_users[name];

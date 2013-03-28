@@ -20,29 +20,19 @@
         <input type="submit" value="login" id="loginsubmit" />
       </form>
     </div>
-
-    <div id="init">
-      <div class="title">
-        Who will play first ?
-      </div>
-      <div class="bl" data-player="x">
-        <div class="startcell x" data-player="x"></div><br />
-        Blue is you
-      </div>
-      <div class="bl" data-player="o">
-        <div class="startcell o" data-player="o"></div><br />
-        Red is AI
-      </div>
-      <div>
-        <div class="result" id="human">0</div>
-        <div class="result" id="draw">0</div>
-        <div class="result" id="robot">0</div>
-      </div>
+    <div id="waiting">
+      <p>Click on another player to challenge him.</p>
+      <p>Starting player will be randomly decided by the system.</p>
     </div>
     <div id="grid">
       <div class="cell active" id="00"></div><div class="cell active" id="01"></div><div class="cell active" id="02"></div><br />
       <div class="cell active" id="10"></div><div class="cell active" id="11"></div><div class="cell active" id="12"></div><br />
       <div class="cell active" id="20"></div><div class="cell active" id="21"></div><div class="cell active" id="22"></div><br />
+    </div>
+    <div>
+      <div class="result" id="me">0</div>
+      <div class="result" id="draw">0</div>
+      <div class="result" id="op">0</div>
     </div>
     <div id="message"></div>
     <div id="again">Play Again</div>
