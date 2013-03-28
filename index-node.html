@@ -2,40 +2,7 @@
   <head>
     <title>TiTaTo: fight robot</title>
     <meta charset="utf-8">
-    <style>
-      body { background-color: #000; color: #fff; font-family: monospace; margin: 0; padding: 0; }
-      h1 { text-align: center; font-size: 54px; font-family: monospace; }
-      h1 span { font-size: 30px; color: #999;}
-      #result { display: none; }
-      #login { width: 320px; margin: 50px auto; text-align: center; }
-      #login input { width: 40%; }
-      #flash { color: #f90; }
-      #userslist { width: 220px; height: 100%; margin-right: 20px; text-align: left; position: fixed; top: 0; left: 0; background-color: #444; overflow-y: scroll; overflow-x: hidden; }
-      #userslist h3 { padding: 0 20px; color}
-      #userslist ul { list-style: none; padding: 0; }
-      #userslist ul li { padding: 5px 20px; border-top: 1px solid #444; border-bottom: 1px solid #444; cursor: pointer; }
-      #userslist ul li:hover { border-top: 1px solid #000; border-bottom: 1px solid #000; }
-      #userslist ul li.me { background-color: #444; color: #d98; }
-      #init { width: 320px; margin: 50px auto; text-align: center; display: none; }
-      #init .title { font-size: 24px; margin-bottom: 20px;}
-      #init .bl { width: 150px; display: inline-block; text-align: center; padding: 20px 0; border: 2px solid #000; border-radius: 5px; }
-      #init .bl:hover { cursor: pointer; background-color: #444; border: 2px solid #fff;  }
-      #init .bl .startcell { margin-bottom: 20px; }
-      #init .result { width: 70px; display: inline-block; text-align: center; font-size: 24px; }
-      #grid { margin: 20px auto; display: none; text-align: center; }
-      .cell, .startcell { width: 100px; height: 100px; display: inline-block; border: 1px solid #333; margin: 2px;border-radius: 5px; }
-      .won .cell { border: 1px solid #fff;}
-      .active { cursor: pointer; }
-      .active:hover { border: 1px solid #ccc; }
-      .x { background-color: #369; border: 1px solid #ccc; }
-      .o { background-color: #c33; border: 1px solid #ccc; }
-      .done { border: 1px solid #fff; cursor: auto;  }
-      #again { display: none; width: 320px; margin: 10px auto; text-align: center;
-        background-color: #ccc; padding: 10px 0; color: #000; font-size: 32px;
-        border-radius: 10px; }
-      #again:hover { cursor: pointer; background-color: #fff; }
-      #message { display: none; width: 320px; margin: 10px auto; text-align: center; font-size: 40px; }
-    </style>
+    <link rel="stylesheet" href="/titato.css">
     <script src="/config.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
@@ -44,6 +11,7 @@
         var stage = 0;
         var message_div = document.getElementById("message");
         var login_div = document.getElementById("login");
+        var waiting_div = document.getElementById("waiting");
         var flash_div = document.getElementById("flash");
         var userslist_div = document.getElementById("userslist");
         var init_div = document.getElementById("init");
@@ -58,6 +26,7 @@
         socket.on("identified", function(result) {
           if (result === username) {
             login_div.style.display = "none";
+            waiting_div.style.display = "block";
           } else {
             username = "";
             flash_div.innerHTML = result.message;
