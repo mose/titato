@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded',function() {
       flash_div.innerHTML = result.message;
     }
   });
+
   socket.on("users list", function (data) {
     userslist_div.children[1].innerHTML = "";
     for (i=0;i<data.length;i++) {
@@ -36,25 +37,15 @@ document.addEventListener('DOMContentLoaded',function() {
     }
   });
 
-  Array.prototype.randomElement = function () {
-      return this[Math.floor(Math.random() * this.length)]
-  }
-  var showmessage = function(text) {
-    message_div.innerHTML = text;
-    message_div.style.display = "block";
-  }
-  var fight = function(e) {
-    op = e.target.id;
-    socket.emit("challenge", op);
-  }
-  var play = function(el) {
-    el.className = "cell " + player;
+  socket.on("fight",function(data) {
     for (i=0;i<cells.length;i++) {
-      cells[i].removeEventListener("click",clicklistener);
+      cells[i].addEventListener("click",clicklistener);
     }
-    socket.emit("play", { player: player, shot: el.id});
-    player = (player === "x") ? "o" : "x";
-  }
+    grid_div.style.display = "block";
+    waiting_div.style.display = "none";
+    socket.send("start game");
+  });
+
   socket.on("next",function(data) {
     if (data.result === "draw") {
       endgame();
@@ -82,9 +73,30 @@ document.addEventListener('DOMContentLoaded',function() {
       showmessage("Waiing for "+op+" move ...");
     }
   });
+
+  var showmessage = function(text) {
+    message_div.innerHTML = text;
+    message_div.style.display = "block";
+  }
+
+  var fight = function(e) {
+    op = e.target.id;
+    socket.emit("challenge", op);
+  }
+
+  var play = function(el) {
+    el.className = "cell " + player;
+    for (i=0;i<cells.length;i++) {
+      cells[i].removeEventListener("click",clicklistener);
+    }
+    socket.emit("play", { player: player, shot: el.id});
+    player = (player === "x") ? "o" : "x";
+  }
+
   var clicklistener = function(e) {
     play(e.target);
   }
+
   var endgame = function() {
     for (i=0;i<cells.length;i++) {
       cells[i].className += " done";
@@ -92,6 +104,7 @@ document.addEventListener('DOMContentLoaded',function() {
     }
     document.getElementById("again").style.display = "block";
   }
+
   var reset = function() {
     grid3 = [[false,false,false],[false,false,false],[false,false,false]];
     for (i=0;i<cells.length;i++) {
@@ -100,20 +113,11 @@ document.addEventListener('DOMContentLoaded',function() {
     }
     document.getElementById("again").style.display = "none";
   }
-  socket.on("fight",function(data) {
-    console.log(data);
-    for (i=0;i<cells.length;i++) {
-      cells[i].addEventListener("click",clicklistener);
-    }
-    grid_div.style.display = "block";
-    waiting_div.style.display = "none";
-    socket.send("start game");
-  });
-
 
   document.getElementById("again").addEventListener("click", function(e) {
     reset();
   });
+
   document.getElementById("loginsubmit").addEventListener("click", function(e) {
     e.preventDefault();
     username = document.getElementById("username").value;

@@ -4,6 +4,7 @@ body {
   font-family: monospace;
   margin: 0;
   padding: 0;
+  padding-left: 200px;
 }
 h1 {
   text-align: center;

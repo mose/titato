@@ -8,7 +8,7 @@ if (!fs.existsSync("./config.json")) {
 var app = require('http').createServer(handler)
 , statics = require('node-static')
 , config = require("./config")
-, Game = require("./lib/game").Game
+, game = require("./lib/game")
 , md5 = require('MD5')
 , path = require('path')
 , io = require('socket.io').listen(app);
@@ -17,7 +17,7 @@ var files = new (statics.Server)(path.join(__dirname, config.public_dir), {
   cache: 600
 });
 
-console.log(Game);
+var userlist = new game.Userlist();
 // io.enable('browser client minification');
 // io.enable('browser client etag');
 // io.enable('browser client gzip');
@@ -51,36 +51,35 @@ function handler (req, res) {
   }
 }
 
-var connected_users = {};
-var users = {};
-
-io.configure(function (){
-  io.set("authorization", function (data, accept) {
-    data.sid = md5(data.address.address + data.headers['user-agent']);
-    accept(null, true);
-  });
-});
+// io.configure(function (){
+//   io.set("authorization", function (data, accept) {
+//     data.sid = md5(data.address.address + data.headers['user-agent']);
+//     accept(null, true);
+//   });
+// });
 
 io.sockets.on('connection', function (socket) {
-  socket.emit('users list', Object.keys(connected_users) );
+  socket.emit('users list', userlist.available() );
 
   socket.on('identify', function (data) {
-    if (connected_users[data]) {
-      socket.emit('identified', { message: "This username is already taken, please chose another." });
-    } else if (data.length > 32) {
+    data = encodeURIComponent(data);
+    if (data.length > 32) {
       socket.emit('identified', { message: "This username too long (&gt;32)." });
     } else {
-      socket.me = encodeURI(data);
-      connected_users[data] = socket;
-      users[data] = socket.handshake.sid;
-      socket.broadcast.emit('users list', Object.keys(connected_users) );
-      socket.emit('users list', Object.keys(connected_users) );
-      socket.emit('identified', data);
+      if (userlist.addUser(data)) {
+        socket.me = data;
+        available = userlist.available();
+        socket.broadcast.emit('users list', available );
+        socket.emit('users list', available );
+        socket.emit('identified', data);
+      } else {
+        socket.emit('identified', { message: "This username is already taken, please chose another." });
+      }
     }
   });
 
   socket.on("challenge", function(data) {
-    socket.game = new Game(socket.me, data);
+    socket.game = new game.Game(socket.me, data);
     connected_users[data].game = socket.game;
     first = socket.game.firstplayer();
     connected_users[data].emit("fight", { op: socket.me, first: (first === data)} );
