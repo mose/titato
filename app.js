@@ -8,7 +8,7 @@ if (!fs.existsSync("./config.json")) {
 var app = require('http').createServer(handler)
 , statics = require('node-static')
 , config = require("./config")
-, game = require("./lib/game")
+, Game = require("./lib/game").Game
 , md5 = require('MD5')
 , path = require('path')
 , io = require('socket.io').listen(app);
@@ -17,6 +17,7 @@ var files = new (statics.Server)(path.join(__dirname, config.public_dir), {
   cache: 600
 });
 
+console.log(Game);
 // io.enable('browser client minification');
 // io.enable('browser client etag');
 // io.enable('browser client gzip');
@@ -78,13 +79,17 @@ io.sockets.on('connection', function (socket) {
     }
   });
 
-  socket.on("fight", function(data) {
-    console.log(data);
-    connected_users[data].emit("fight", socket.me);
-    socket.emit("fight", data);
+  socket.on("challenge", function(data) {
+    socket.game = new Game(socket.me, data);
+    connected_users[data].game = socket.game;
+    first = socket.game.firstplayer();
+    connected_users[data].emit("fight", { op: socket.me, first: (first === data)} );
+    socket.emit("fight", { op: data, first: (first === socket.me)});
   });
+
   socket.on("play", function(data) {
-  });  
+  });
+
   socket.on('disconnect', function() {
     name = socket.me;
     delete connected_users[name];

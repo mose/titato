@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded',function() {
   var flash_div = document.getElementById("flash");
   var userslist_div = document.getElementById("userslist");
   var socket = io.connect(url);
+  var player;
+  var cells = document.querySelectorAll(".cell");
+  var wins = { me: 0, op: 0, draw: 0 };
 
   socket.on("identified", function(result) {
     if (result === username) {
@@ -36,21 +39,13 @@ document.addEventListener('DOMContentLoaded',function() {
   Array.prototype.randomElement = function () {
       return this[Math.floor(Math.random() * this.length)]
   }
-  var getByClass = function(className, parent) {
-    parent || (parent = document);
-    var descendants = parent.getElementsByTagName("*"), i=-1, e, result=[];
-    while (e = descendants[++i]) {
-      ((' '+(e['class'] || e.className)+' ').indexOf(' '+className+' ') > -1) && result.push(e);
-    }
-    return result;
-  }
   var showmessage = function(text) {
     message_div.innerHTML = text;
     message_div.style.display = "block";
   }
   var fight = function(e) {
     op = e.target.id;
-    socket.emit("fight", op);
+    socket.emit("challenge", op);
   }
   var play = function(el) {
     el.className = "cell " + player;
@@ -106,6 +101,7 @@ document.addEventListener('DOMContentLoaded',function() {
     document.getElementById("again").style.display = "none";
   }
   socket.on("fight",function(data) {
+    console.log(data);
     for (i=0;i<cells.length;i++) {
       cells[i].addEventListener("click",clicklistener);
     }
@@ -114,9 +110,6 @@ document.addEventListener('DOMContentLoaded',function() {
     socket.send("start game");
   });
 
-  var player;
-  var cells = getByClass("cell");
-  var wins = { me: 0, op: 0, draw: 0 };
 
   document.getElementById("again").addEventListener("click", function(e) {
     reset();

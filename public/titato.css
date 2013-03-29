@@ -70,37 +70,15 @@ a {
   background-color: #444;
   color: #d98;
 }
-#init {
+#score {
   width: 320px;
   margin: 50px auto;
   text-align: center;
   display: none;
 }
-#init .title {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-#init .bl {
-  width: 150px;
+#score .result {
   display: inline-block;
-  text-align: center;
-  padding: 20px 0;
-  border: 2px solid #000;
-  border-radius: 5px;
-}
-#init .bl:hover {
-  cursor: pointer;
-  background-color: #444;
-  border: 2px solid #fff;
-}
-#init .bl .startcell {
-  margin-bottom: 20px;
-}
-#init .result {
-  width: 70px;
-  display: inline-block;
-  text-align: center;
-  font-size: 24px;
+  margin: 20px;
 }
 #grid {
   margin: 20px auto;
