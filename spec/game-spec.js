@@ -102,14 +102,14 @@ describe('Game', function(){
 
   it ("makes it possible to play a slot (play)", function(){
     expect(game.play("x","21")).toBeTruthy();
-    expect(game.playedslots()).toEqual([ '', '', 'x', '', 'x', '', '', '' ]);
+    expect(game.playedslots()).toEqual([ '', '', 'a', '', 'a', '', '', '' ]);
   });
 
   it ("makes it impossible to play a slot that was already played (play)", function(){
     game.play("x","21")
-    game.play("y","11")
+    game.play("o","11")
     expect(game.play("x","21")).toBeFalsy();
-    expect(game.playedslots()).toEqual([ '', 'y', 'x', '', 'yx', '', 'y', 'y' ]);
+    expect(game.playedslots()).toEqual([ '', 'd', 'a', '', 'da', '', 'd', 'd' ]);
   });
 
   it ("knows when the game is unfinished (finished)", function(){
@@ -133,6 +133,26 @@ describe('Game', function(){
 
   it ("knows who plays next (nextplayer)", function(){
     expect(game.nextplayer("x")).toEqual("o");
+  });
+
+  it ("knows if nobody won yet (checkwinner)", function(){
+    game.play("x","01");
+    game.play("x","11");
+    expect(game.checkwinner()).toBeFalsy();
+  });
+
+  it ("knows if 'x' won (checkwinner)", function(){
+    game.play("x","01");
+    game.play("x","11");
+    game.play("x","21");
+    expect(game.checkwinner()).toEqual("x");
+  });
+
+  it ("knows if 'x' won (checkwinner)", function(){
+    game.play("o","00");
+    game.play("o","11");
+    game.play("o","22");
+    expect(game.checkwinner()).toEqual("o");
   });
 
 });

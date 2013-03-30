@@ -90,10 +90,10 @@ io.sockets.on('connection', function (socket) {
     if (socket.game.play(data.shot)) {
       if (socket.game.finished()) {
 
-      } else if {
+      } else {
         next = socket.game.nextplayer(socket.me);
         socket.emit("next", { player: next });
-
+        userlist.getUser(next).socket.emit(next);
       }
     } else {
       socket.emit("message", "Something went wrong.");
