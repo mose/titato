@@ -80,24 +80,33 @@ io.sockets.on('connection', function (socket) {
 
   socket.on("challenge", function(data) {
     socket.game = new game.Game(socket.me, data);
-    connected_users[data].game = socket.game;
+    userlist.getUser(data).socket.game = socket.game;
     first = socket.game.firstplayer();
-    connected_users[data].emit("fight", { op: socket.me, first: (first === data)} );
+    userlist.getUser(data).socket.emit("fight", { op: socket.me, first: (first === data)} );
     socket.emit("fight", { op: data, first: (first === socket.me)});
   });
 
   socket.on("play", function(data) {
+    if (socket.game.play(data.shot)) {
+      if (socket.game.finished()) {
+
+      } else if {
+        next = socket.game.nextplayer(socket.me);
+        socket.emit("next", { player: next });
+
+      }
+    } else {
+      socket.emit("message", "Something went wrong.");
+    }
   });
 
   socket.on('disconnect', function() {
     name = socket.me;
-    delete connected_users[name];
-    socket.broadcast.emit('users list', Object.keys(connected_users) );
+    delete userlist.dropUser(name);
+    socket.broadcast.emit('users list', userlist.available() );
   });
 
 });
-
-
 
 app.listen(config.port,config.server);
 console.log('Server running at '+config.server+":"+config.port);

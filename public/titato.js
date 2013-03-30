@@ -36,14 +36,24 @@ document.addEventListener('DOMContentLoaded',function() {
       userslist_div.children[1].appendChild(li);
     }
   });
-
+  
+  socket.on("message", function (data) {
+    showmessage(data);
+  });
+  
   socket.on("fight",function(data) {
-    for (i=0;i<cells.length;i++) {
-      cells[i].addEventListener("click",clicklistener);
-    }
     grid_div.style.display = "block";
     waiting_div.style.display = "none";
-    socket.send("start game");
+    if (data.first) {
+      for (i=0;i<cells.length;i++) {
+        cells[i].addEventListener("click",clicklistener);
+      }
+      showmessage("Challenging "+op+"<br />You play first.");
+      player = "x";
+    } else {
+      showmessage("Challenging "+op+"<br />"+op+" play first.<br />Waiting ...");
+      player = "o";
+    }
   });
 
   socket.on("next",function(data) {
@@ -89,8 +99,8 @@ document.addEventListener('DOMContentLoaded',function() {
     for (i=0;i<cells.length;i++) {
       cells[i].removeEventListener("click",clicklistener);
     }
-    socket.emit("play", { player: player, shot: el.id});
-    player = (player === "x") ? "o" : "x";
+    socket.emit("play", { shot: el.id});
+    player = "x";
   }
 
   var clicklistener = function(e) {

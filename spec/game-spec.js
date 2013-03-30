@@ -17,6 +17,15 @@ describe('Userlist', function(){
     expect(user).toEqual(jasmine.any(g.User));
   });
 
+  it ("drops a user (addUser)", function(){
+    userlist.addUser("alice",null);
+    userlist.addUser("bob",null);
+    userlist.addUser("charlie",null);
+    expect(userlist.length()).toBe(3);
+    userlist.dropUser("bob");
+    expect(userlist.length()).toBe(2);
+  });
+
   it ("knows its length (length)", function(){
     user = userlist.addUser("alice",null);
     expect(userlist.length()).toBe(1);
@@ -120,6 +129,10 @@ describe('Game', function(){
     }
     diff = Math.abs(num["x"] - num["o"]);
     expect(diff).toBeLessThan(25);
+  });
+
+  it ("knows who plays next (nextplayer)", function(){
+    expect(game.nextplayer("x")).toEqual("o");
   });
 
 });
