@@ -95,6 +95,9 @@ document.addEventListener('DOMContentLoaded',function() {
           cells[i].addEventListener("click",clicklistener);
         }
       }
+      if (Robot) {
+        console.log(Robot.play(data.position));
+      }
       showmessage("Your turn");
     } else {
       showmessage("Waiting for "+data.player+" move ...");
@@ -150,6 +153,24 @@ document.addEventListener('DOMContentLoaded',function() {
     e.preventDefault();
     username = document.getElementById("username").value;
     socket.emit("identify", username);
+  });
+
+  document.getElementById("save").addEventListener("click", function(e) {
+    e.preventDefault();
+    code = document.getElementById("robotscript").value;
+    scripttag = document.getElementById("userscript");
+    scripttag.innerHTML = code;
+  });
+  document.getElementById("expand").addEventListener("click", function(e) {
+    e.preventDefault();
+    div = document.getElementById("robotpanel")
+    if (div.className === "wide") {
+      div.className = "";
+      this.innerHTML = "&lt;&lt; Expand";
+    } else {
+      div.className = "wide";
+      this.innerHTML = "&gt;&gt; Collapse";
+    }
   });
 
 });

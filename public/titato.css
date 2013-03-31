@@ -3,8 +3,7 @@ body {
   color: #fff;
   font-family: monospace;
   margin: 0;
-  padding: 0;
-  padding-left: 200px;
+  padding: 0 300px 0 200px;
 }
 h1 {
   text-align: center;
@@ -71,6 +70,72 @@ a {
   background-color: #444;
   color: #d98;
 }
+#robotpanel {
+  width: 320px;
+  height: 100%;
+  margin-left: 20px;
+  position: fixed;
+  top: 0; right: 0;
+  background-color: #222;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  border: 0;
+}
+#robotpanel.wide {
+  width: 100%;
+}
+#robotpanel h3 {
+  padding: 2px 20px;
+}
+#robotpanel textarea {
+  margin: 2px 20px;
+  height: 80%;
+  width: 260px;
+  background-color: #444;
+  border: 1px solid #666;
+  color: #fff;
+  box-shadow: inset 2px -2px 20px #222;
+  padding: 6px;
+  font-family: "Source Code Pro", monospace;
+  font-size: 13px;
+}
+#robotpanel.wide textarea {
+  width: 95%;
+}
+#robotpanel div {
+  margin: 2px 20px;
+}
+#expand {
+  float: left;
+  margin: 15px;
+  padding: 0 5px;
+}
+button {
+  padding: 2px 30px;
+  font-weight: bold;
+  border: 1px solid #000;
+  border-radius: 5px;
+  cursor: pointer;
+  letter-spacing: 2px;
+}
+button.off {
+  background-color: #333;
+  text-shadow: -1px 1px 2px #000;
+  color: #999;
+}
+button.off:hover {
+  background-color: #444;
+  color: #fff;
+}
+button.on {
+  background-color: #444;
+  box-shadow: inset -2px 2px 3px #666, inset 2px -2px 3px #222, -1px 1px 3px #000;
+  text-shadow: -1px 1px 2px #000;
+  color: #fff;
+}
+button.on:hover {
+  background-color: #555;
+}
 #score {
   width: 320px;
   margin: 50px auto;
@@ -95,6 +160,7 @@ a {
   display: none;
   text-align: center;
 }
+
 .cell, .startcell {
   width: 100px;
   height: 100px;
