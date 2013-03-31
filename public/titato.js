@@ -1,9 +1,11 @@
 document.addEventListener('DOMContentLoaded',function() {
   var username;
+  var opponent;
   var message_div = document.getElementById("message");
   var login_div = document.getElementById("login");
   var waiting_div = document.getElementById("waiting");
   var grid_div = document.getElementById("grid");
+  var score_div = document.getElementById("score");
   var flash_div = document.getElementById("flash");
   var userslist_div = document.getElementById("userslist");
   var socket = io.connect(url);
@@ -36,27 +38,38 @@ document.addEventListener('DOMContentLoaded',function() {
       userslist_div.children[1].appendChild(li);
     }
   });
-  
+
   socket.on("message", function (data) {
     showmessage(data);
   });
   
   socket.on("fight",function(data) {
+    opponent = data.op;
     grid_div.style.display = "block";
     waiting_div.style.display = "none";
+    score_div.style.display = "block";
+    document.getElementById("l_me").innerHTML = username;
+    document.getElementById("l_op").innerHTML = opponent;
+    for (i=0;i<cells.length;i++) {
+      cells[i].className = "cell active";
+    }
+    document.getElementById("again").style.display = "none";
     if (data.first) {
       for (i=0;i<cells.length;i++) {
         cells[i].addEventListener("click",clicklistener);
       }
-      showmessage("Challenging "+op+"<br />You play first.");
+      showmessage("Challenging "+opponent+"<br />You play first.");
       player = "x";
     } else {
-      showmessage("Challenging "+op+"<br />"+op+" play first.<br />Waiting ...");
+      showmessage("Challenging "+opponent+"<br />"+opponent+" play first.<br />Waiting ...");
       player = "o";
     }
   });
 
   socket.on("next",function(data) {
+    if (data.position) {
+      document.getElementById(data.position).className = "cell x";
+    }
     if (data.result === "draw") {
       endgame();
       wins.draw++;
@@ -72,16 +85,23 @@ document.addEventListener('DOMContentLoaded',function() {
         endgame();
         wins.op++;
         document.getElementById("op").innerHTML = wins.op;
-        showmessage(op+" wins :(");
+        showmessage(data.player+" wins :(");
       }
     } else if (data.player === username) {
-      for (i=0;i<data.cells.length;i++) {
-        document.getElementById(data.cells[i]).addEventListener("click",clicklistener);
+      for (i=0;i<cells.length;i++) {
+        if (cells[i].className == "cell active") {
+          cells[i].addEventListener("click",clicklistener);
+        }
       }
       showmessage("Your turn");
     } else {
-      showmessage("Waiing for "+op+" move ...");
+      showmessage("Waiting for "+data.player+" move ...");
     }
+  });
+
+  socket.on("disconnect",function(data) {
+    endgame();
+    showmessage("ohh, seems that "+data.player+" disconnected. Game aborted ...");
   });
 
   var showmessage = function(text) {
@@ -90,12 +110,12 @@ document.addEventListener('DOMContentLoaded',function() {
   }
 
   var fight = function(e) {
-    op = e.target.id;
-    socket.emit("challenge", op);
+    opponent = e.target.id;
+    socket.emit("challenge", opponent);
   }
 
   var play = function(el) {
-    el.className = "cell " + player;
+    el.className = "cell o";
     for (i=0;i<cells.length;i++) {
       cells[i].removeEventListener("click",clicklistener);
     }
@@ -116,12 +136,7 @@ document.addEventListener('DOMContentLoaded',function() {
   }
 
   var reset = function() {
-    grid3 = [[false,false,false],[false,false,false],[false,false,false]];
-    for (i=0;i<cells.length;i++) {
-      cells[i].className = "cell active";
-      cells[i].removeEventListener("click",clicklistener);
-    }
-    document.getElementById("again").style.display = "none";
+    socket.emit("challenge", opponent);
   }
 
   document.getElementById("again").addEventListener("click", function(e) {

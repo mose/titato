@@ -27,7 +27,7 @@ function handler (req, res) {
     data = 'var url = "http://'+config.server+":"+config.port+'";';
       res.writeHead(200, {
         'Content-Length': data.length,
-        'Content-Type': 'text/html'
+        'Content-Type': 'text/javascript'
       });
     res.end(data);
   } else if (req.url === '/') {
@@ -62,11 +62,11 @@ io.sockets.on('connection', function (socket) {
   socket.emit('users list', userlist.available() );
 
   socket.on('identify', function (data) {
-    data = encodeURIComponent(data);
-    if (data.length > 32) {
+    data = data.replace("<",'');
+    if (data.length > 16) {
       socket.emit('identified', { message: "This username too long (&gt;32)." });
     } else {
-      if (userlist.addUser(data)) {
+      if (userlist.addUser(data,socket)) {
         socket.me = data;
         available = userlist.available();
         socket.broadcast.emit('users list', available );
@@ -81,27 +81,49 @@ io.sockets.on('connection', function (socket) {
   socket.on("challenge", function(data) {
     socket.game = new game.Game(socket.me, data);
     userlist.getUser(data).socket.game = socket.game;
+    userlist.getUser(socket.me).playing = true;
+    userlist.getUser(data).playing = true;
     first = socket.game.firstplayer();
     userlist.getUser(data).socket.emit("fight", { op: socket.me, first: (first === data)} );
     socket.emit("fight", { op: data, first: (first === socket.me)});
+    available = userlist.available();
+    socket.broadcast.emit('users list', available );
+    socket.emit('users list', available );
   });
 
   socket.on("play", function(data) {
-    if (socket.game.play(data.shot)) {
-      if (socket.game.finished()) {
-
-      } else {
+    if (socket.game) {
+      if (socket.game.play(socket.me,data.shot)) {
         next = socket.game.nextplayer(socket.me);
-        socket.emit("next", { player: next });
-        userlist.getUser(next).socket.emit(next);
+        winner = socket.game.checkwinner();
+        if (winner) {
+          socket.emit("next", { result: "win", player: winner });
+          userlist.getUser(next).socket.emit("next", { result: "win", player: winner, position: data.shot });
+        } else if (socket.game.finished()) {
+          socket.emit("next", { result: "draw" });
+          userlist.getUser(next).socket.emit("next", { result: "draw", position: data.shot });
+        } else {
+          socket.emit("next", { player: next });
+          userlist.getUser(next).socket.emit("next", { player: next, position: data.shot });
+        }
+      } else {
+        socket.emit("message", "Something went wrong.");
       }
     } else {
-      socket.emit("message", "Something went wrong.");
+      socket.emit("message", "Sorry your opponent disconnected.");
     }
   });
 
-  socket.on('disconnect', function() {
+  socket.on('disconnect', function(data) {
     name = socket.me;
+    if (socket.game) {
+      next = socket.game.nextplayer(name);
+      console.dir(socket.game);
+      userlist.getUser(name).playing = false;
+      userlist.getUser(next).socket.emit("disconnected","");
+      delete socket.game;
+      delete userlist.getUser(next).socket.game;
+    }
     delete userlist.dropUser(name);
     socket.broadcast.emit('users list', userlist.available() );
   });

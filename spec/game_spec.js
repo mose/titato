@@ -3,7 +3,6 @@
 // jasmine-node spec/
 
 var g = require("../lib/game");
-var userlist = new g.Userlist();
 
 describe('Userlist', function(){
   var userlist;

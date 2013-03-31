@@ -77,9 +77,18 @@ a {
   text-align: center;
   display: none;
 }
+#score h4 {
+  margin: 0;
+  font-size: 18px;
+  background-color: #222;
+}
 #score .result {
   display: inline-block;
-  margin: 20px;
+  margin: 0 20px;
+}
+#score .result span {
+  color: #888;
+  display: block;
 }
 #grid {
   margin: 20px auto;
@@ -135,5 +144,5 @@ a {
   width: 320px;
   margin: 10px auto;
   text-align: center;
-  font-size: 40px;
+  font-size: 18px;
 }
