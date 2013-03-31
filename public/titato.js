@@ -32,7 +32,9 @@ document.addEventListener('DOMContentLoaded',function() {
         li.className = "me";
       } else {
         li.className = "op";
-        li.addEventListener("click",fight);
+        if (username) {
+          li.addEventListener("click",fight);
+        }
       }
       li.appendChild(document.createTextNode(data[i]));
       userslist_div.children[1].appendChild(li);
@@ -99,8 +101,9 @@ document.addEventListener('DOMContentLoaded',function() {
     }
   });
 
-  socket.on("disconnect",function(data) {
+  socket.on("disco",function(data) {
     endgame();
+    document.getElementById("again").style.display = "none";
     showmessage("ohh, seems that "+data.player+" disconnected. Game aborted ...");
   });
 

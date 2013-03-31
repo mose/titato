@@ -119,8 +119,8 @@ io.sockets.on('connection', function (socket) {
     if (socket.game) {
       next = socket.game.nextplayer(name);
       console.dir(socket.game);
-      userlist.getUser(name).playing = false;
-      userlist.getUser(next).socket.emit("disconnected","");
+      userlist.getUser(next).playing = false;
+      userlist.getUser(next).socket.emit("disco", {} );
       delete socket.game;
       delete userlist.getUser(next).socket.game;
     }
