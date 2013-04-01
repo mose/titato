@@ -56,8 +56,7 @@ Robot.prototype.reset = function() {
 
 Robot.prototype.play = function(pos) {
   if (pos) {
-    p = pos.split("");
-    slot = p[0]*3 + parseInt(p[1]);
+    slot = pos[0]*3 + parseInt(pos[1]);
     this.grid[slot] = "x";
   }
   var g = this.grid;
