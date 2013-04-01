@@ -118,19 +118,10 @@ button {
   cursor: pointer;
   letter-spacing: 2px;
 }
-button.off {
-  background-color: #333;
-  text-shadow: -1px 1px 2px #000;
-  color: #999;
-}
-button.off:hover {
-  background-color: #444;
-  color: #fff;
-}
 button.on {
   background-color: #444;
-  box-shadow: inset -2px 2px 3px #666, inset 2px -2px 3px #222, -1px 1px 3px #000;
-  text-shadow: -1px 1px 2px #000;
+  box-shadow: inset -1px 1px 3px #999, inset 1px -1px 3px #000, -1px 1px 5px #111;
+  text-shadow: -1px 1px 3px #000;
   color: #fff;
 }
 button.on:hover {
