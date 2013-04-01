@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded',function() {
   socket.on("message", function (data) {
     showmessage(data);
   });
-  
+
   socket.on("fight",function(data) {
     opponent = data.op;
     grid_div.style.display = "block";
@@ -55,6 +55,9 @@ document.addEventListener('DOMContentLoaded',function() {
     for (i=0;i<cells.length;i++) {
       cells[i].className = "cell active";
     }
+    if (robot && robot.reset && typeof robot.reset === "function") {
+      robot.reset();
+    }
     document.getElementById("again").style.display = "none";
     if (data.first) {
       for (i=0;i<cells.length;i++) {
@@ -62,6 +65,10 @@ document.addEventListener('DOMContentLoaded',function() {
       }
       showmessage("Challenging "+opponent+"<br />You play first.");
       player = "x";
+      if (robot && robot.play && typeof robot.play === "function") {
+        shot = document.getElementById(robot.play());
+        play(shot);
+      }
     } else {
       showmessage("Challenging "+opponent+"<br />"+opponent+" play first.<br />Waiting ...");
       player = "o";
@@ -95,8 +102,9 @@ document.addEventListener('DOMContentLoaded',function() {
           cells[i].addEventListener("click",clicklistener);
         }
       }
-      if (Robot) {
-        console.log(Robot.play(data.position));
+      if (robot && robot.play && typeof robot.play === "function") {
+        shot = document.getElementById(robot.play(data.position));
+        setTimeout(function(){ play(shot); },200);
       }
       showmessage("Your turn");
     } else {
@@ -158,9 +166,19 @@ document.addEventListener('DOMContentLoaded',function() {
   document.getElementById("save").addEventListener("click", function(e) {
     e.preventDefault();
     code = document.getElementById("robotscript").value;
-    scripttag = document.getElementById("userscript");
-    scripttag.innerHTML = code;
+    tag = document.createElement("script");
+    tag.type = "text/javascript";
+    tag.id = "userscript";
+    tag.appendChild(document.createTextNode(code));
+    x = document.getElementById("userscript");
+    head = x.parentNode;
+    head.removeChild(x);
+    head.appendChild(tag);
+    loaded = document.createElement("span").appendChild(document.createTextNode(" (Loaded)"));
+    e.target.appendChild(loaded);
+    setTimeout(function(){ e.target.removeChild(loaded)},2000);
   });
+
   document.getElementById("expand").addEventListener("click", function(e) {
     e.preventDefault();
     div = document.getElementById("robotpanel")
