@@ -62,12 +62,10 @@ Robot.prototype.play = function(pos) {
   }
   var g = this.grid;
   op = Object.keys(g).filter(function(x){ return (g[x] === false);});
-  console.log(Object.keys(this.grid));
   mine = op[Math.floor(Math.random()*op.length)];
   this.grid[mine] = "o";
   x = Math.floor(mine/3);
   y = mine%3;
-  console.log(pos,op,mine,x,y,this.grid);
   return(""+x+y);
 }
 
