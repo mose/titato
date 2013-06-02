@@ -107,8 +107,7 @@ a {
 }
 #expand {
   float: left;
-  margin: 15px;
-  padding: 0 5px;
+  margin: 12px 15px;
 }
 button {
   padding: 2px 30px;
@@ -118,23 +117,22 @@ button {
   cursor: pointer;
   letter-spacing: 2px;
 }
-button.off {
-  background-color: #333;
-  text-shadow: -1px 1px 2px #000;
-  color: #999;
-}
-button.off:hover {
-  background-color: #444;
-  color: #fff;
-}
+
 button.on {
   background-color: #444;
-  box-shadow: inset -2px 2px 3px #666, inset 2px -2px 3px #222, -1px 1px 3px #000;
-  text-shadow: -1px 1px 2px #000;
+  box-shadow: inset -1px 1px 3px #999, inset 1px -1px 3px #000, -1px 1px 5px #111;
+  text-shadow: -1px 1px 3px #000;
   color: #fff;
+  line-height:18px;
 }
 button.on:hover {
   background-color: #555;
+}
+button.on:active {
+  box-shadow: inset -1px 1px 3px #000, inset 1px -1px 3px #999, -1px 1px 5px #666;
+  padding-top: 6px;
+  padding: 6px 34px 2px 26px;
+  line-height:14px;
 }
 #score {
   width: 320px;

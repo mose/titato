@@ -16,12 +16,12 @@
     "multiplayer"
   ],
   "dependencies": {
-    "socket.io": "0.9.13",
+    "socket.io": "0.9.14",
     "MD5": "1.0.3",
-    "node-static": "0.6.7"
+    "node-static": "0.6.9"
   },
   "license": "MIT",
   "engine": {
-    "node": "0.6.17"
+    "node": "0.8.16"
   }
 }

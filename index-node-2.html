@@ -1,0 +1,118 @@
+<html>
+  <head>
+    <title>TiTaTo: fight robot</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="titato.css">
+    <script type="text/javascript" src="config.js"></script>
+    <script type="text/javascript" src="socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="titato.js"></script>
+    <script type="text/javascript" id="userscript"></script>
+  </head>
+  <body>
+    <h1>tictactoe<br /><span>Fight!</span></h1>
+    <div id="userslist">
+      <h3>/who</h3>
+      <ul></ul>
+    </div>
+    <div id="login">
+      <div id="flash"></div>
+      <form id="loginform">
+        <input type="text" name="login" id="username" placeholder="Enter your name" value="" />
+        <input type="submit" value="login" id="loginsubmit" />
+      </form>
+    </div>
+    <div id="waiting">
+      <p>Click on another player to challenge him.</p>
+      <p>Starting player will be randomly decided by the system.</p>
+    </div>
+    <form id="robotpanel">
+      <button id="expand" class="on">&lt;&lt; Expand</button>
+      <h3>Code a robot</h3>
+<textarea id="robotscript">
+// Your Robot object needs to have one mandatory play(pos) function
+// where pos is the slot played by the opponent,
+// pos is [0-2][0-2] with horiz-vert
+// eg. 00 is the top-left cell, 22 is the bottom-right cell
+
+var Robot = function() {
+
+  this.grid3 = [[false,false,false],[false,false,false],[false,false,false]];
+  this.transpose = function(a) {
+    return Object.keys(a[0]).map(function (c) { return a.map(function (r) { return r[c]; }); });
+  };
+  this.diagonalize = function(a) {
+    return [ [ this.grid3[0][0], this.grid3[1][1], this.grid3[2][2] ], [ this.grid3[0][2], this.grid3[1][1], this.grid3[2][0] ] ];
+  };
+  this.fullgrid = function() {
+    return this.grid3.concat(transpose(this.grid3)).concat(diagonalize(this.grid3));
+  };
+  this.playedslots = function() {
+    return this.fullgrid().map(function(x){ return x.map(function(y){if(y!==false) return y; }).join("") });
+  };
+  this.playmove = function(i,x) {
+    g = Math.floor(i/3);
+    if (g === 0) {
+      c = "" + i + x;
+    } else if (g === 1) {
+      c = "" + x + (i-3);
+    } else {
+      diag = [ ["00", "11", "22"], ["02", "11", "20"] ];
+      d = i - 6;
+      c = diag[d][x];
+    }
+    id = c.split("");
+    grid3[id[0]][id[1]] = "o";
+    return(c);
+  };
+  this.play = function(pos) {
+    var id = pos.split("");
+    grid3[id[0]][id[1]] = "x";
+    grid = fullgrid();
+    if (playedslots().indexOf("xxx") !== -1) {
+      return;
+    }
+    winrow = playedslots().indexOf("oo");
+    if (winrow !== -1) {
+      wincell = grid[winrow].indexOf(false);
+      return(playmove(winrow,wincell));
+    }
+    defendrow = playedslots().indexOf("xx");
+    if (defendrow !== -1) {
+      defendcell = grid[defendrow].indexOf(false);
+      return(playmove(defendrow,defendcell));
+    }
+    nextrow = playedslots().indexOf("o");
+    if (nextrow !== -1) {
+      nextcell = grid[nextrow].indexOf(false);
+      return(playmove(nextrow,nextcell));
+    }
+    diags = ["00","02","11","20","22"];
+    id = diags.randomElement();
+    i = id.split("");
+    if (grid3[id[0]][id[1]] !== false) {
+      diags.splice(diags.indexOf(id),1);
+      i = diags.randomElement().split("");
+    }
+    return(playmove(i[0],i[1]));
+  };
+});
+</textarea>
+      <div>
+        <button id="save" class="on">Load</button>
+      </div>
+    </form>
+    <div id="grid">
+      <div class="cell active" id="00"></div><div class="cell active" id="01"></div><div class="cell active" id="02"></div><br />
+      <div class="cell active" id="10"></div><div class="cell active" id="11"></div><div class="cell active" id="12"></div><br />
+      <div class="cell active" id="20"></div><div class="cell active" id="21"></div><div class="cell active" id="22"></div><br />
+    </div>
+    <div id="message"></div>
+    <div id="again">Play Again</div>
+    <div id="score">
+      <h4>Scores</h4>
+      <div class="result"><span id="l_me">You</span><b id="me">0</b></div>
+      <div class="result"><span>Draws</span><b id="draw">0</b></div>
+      <div class="result"><span id="l_op">Opponent</span><b id="op">0</b></div>
+    </div>
+  </body>
+</html>

@@ -93,7 +93,7 @@ io.sockets.on('connection', function (socket) {
 
   socket.on("play", function(data) {
     if (socket.game) {
-      if (socket.game.play(socket.me,data.shot)) {
+      if (data.shot && data.shot.match(/[0-2][0-2]/) && socket.game.play(socket.me,data.shot)) {
         next = socket.game.nextplayer(socket.me);
         winner = socket.game.checkwinner();
         if (winner) {
@@ -108,6 +108,7 @@ io.sockets.on('connection', function (socket) {
         }
       } else {
         socket.emit("message", "Something went wrong.");
+        userlist.getUser(next).socket.emit("message", "Something went wrong.");
       }
     } else {
       socket.emit("message", "Sorry your opponent disconnected.");
@@ -118,7 +119,6 @@ io.sockets.on('connection', function (socket) {
     name = socket.me;
     if (socket.game) {
       next = socket.game.nextplayer(name);
-      console.dir(socket.game);
       userlist.getUser(next).playing = false;
       userlist.getUser(next).socket.emit("disco", {} );
       delete socket.game;
